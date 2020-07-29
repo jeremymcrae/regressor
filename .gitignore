@@ -1,0 +1,9 @@
+*.pyc
+*__pycache__/
+dist/
+build/
+src/regresser/*.cpp
+src/regresser/*.so
+*.egg
+*.egg-info
+*.DS_Store
