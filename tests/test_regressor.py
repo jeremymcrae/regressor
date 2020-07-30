@@ -38,7 +38,7 @@ class TestRegressor(unittest.TestCase):
             self.assertAlmostEqual(old.intercept, new.intercept, places=5)
             self.assertAlmostEqual(old.rvalue, new.rvalue, places=5)
             self.assertAlmostEqual(old.pvalue, new.pvalue, places=5)
-            self.assertAlmostEqual(old.stderr, new.stderr, places=5)
+            self.assertAlmostEqual(old.stderr, new.stderr, delta=1e-5)
 
     def test_linregress_large(self):
         ''' regressor.linregress matches scipy.stats.linregress
@@ -55,4 +55,4 @@ class TestRegressor(unittest.TestCase):
             self.assertAlmostEqual(old.intercept, new.intercept, places=4)
             self.assertAlmostEqual(old.rvalue, new.rvalue, places=4)
             self.assertAlmostEqual(old.pvalue, new.pvalue, places=4)
-            self.assertAlmostEqual(old.stderr, new.stderr, places=4)
+            self.assertAlmostEqual(old.stderr, new.stderr, delta=1e-6)
