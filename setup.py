@@ -30,7 +30,7 @@ ext = cythonize([
         language='c++'),
     ])
 
-setup(name='regresser',
+setup(name='regressor',
     description='Package for fast regression',
     long_description=io.open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
