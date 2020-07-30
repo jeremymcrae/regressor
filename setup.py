@@ -49,5 +49,8 @@ setup(name='regressor',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
     ],
     ext_modules=ext,
+    tests_require=[
+        'scipy',
+    ],
     test_loader='unittest:TestLoader',
     )
