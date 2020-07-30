@@ -11,7 +11,7 @@ from scipy.special import stdtr
 
 LinResult = namedtuple('LinregressResult', ['slope', 'intercept', 'rvalue', 'pvalue', 'stderr'])
 
-cdef extern from "covariance.h" namespace "regresser":
+cdef extern from "covariance.h" namespace "regressor":
     cdef struct covmeans:
         float x
         float y

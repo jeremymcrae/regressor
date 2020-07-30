@@ -21,10 +21,10 @@ if platform.machine() == 'x86_64':
     EXTRA_COMPILE_ARGS += ['-mavx', '-mavx2', '-mfma']
 
 ext = cythonize([
-    Extension('regresser.cov',
+    Extension('regressor.regress',
         extra_compile_args=EXTRA_COMPILE_ARGS,
         extra_link_args=EXTRA_LINK_ARGS,
-        sources=['src/regresser/regress.pyx',
+        sources=['src/regressor/regress.pyx',
             'src/covariance.cpp',],
         include_dirs=['src/', numpy.get_include()],
         language='c++'),
@@ -38,8 +38,8 @@ setup(name='regresser',
     author='Jeremy McRae',
     author_email='jmcrae@illumina.com',
     license="MIT",
-    url='https://github.com/jeremymcrae/regresser',
-    packages=['regresser'],
+    url='https://github.com/jeremymcrae/regressor',
+    packages=['regressor'],
     package_dir={'': 'src'},
     install_requires=[
         'numpy',

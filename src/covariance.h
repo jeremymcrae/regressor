@@ -1,9 +1,9 @@
-#ifndef REGRESSER_REGRESSER_H_
-#define REGRESSER_REGRESSER_H_
+#ifndef REGRESSOR_COVARIANCE_H_
+#define REGRESSOR_COVARIANCE_H_
 
 #include <cstdint>
 
-namespace regresser {
+namespace regressor {
 
 struct covmeans {
   float x;
@@ -22,6 +22,6 @@ struct covs {
 // get covariance values from two same-sized float arrays
 covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y, bool sampled);
 
-} // namespace regresser
+} // namespace regressor
 
-#endif  // REGRESSER_REGRESSER_H_
+#endif  // REGRESSOR_COVARIANCE_H_

@@ -2,8 +2,8 @@
 *__pycache__/
 dist/
 build/
-src/regresser/*.cpp
-src/regresser/*.so
+src/regressor/*.cpp
+src/regressor/*.so
 *.egg
 *.egg-info
 *.DS_Store

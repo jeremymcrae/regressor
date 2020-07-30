@@ -1,7 +1,7 @@
 # regresser code
 include MANIFEST.in
 include pyproject.toml
-include src/regresser/*.cpp
-include src/regresser/*.pyx
+include src/regressor/*.cpp
+include src/regressor/*.pyx
 include src/*.h
 include src/*.cpp

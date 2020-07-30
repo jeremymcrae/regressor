@@ -8,7 +8,7 @@
 
 #include "covariance.h"
 
-namespace regresser {
+namespace regressor {
 
 /// estimate mean by sampling from the values
 ///
@@ -182,4 +182,4 @@ covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::u
   return {mu, s_xx / ddof, s_xy / ddof, s_xy / ddof, s_yy / ddof, size_x};
 }
 
-} // regresser namespace
+} // regressor namespace
