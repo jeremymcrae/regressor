@@ -43,14 +43,12 @@ setup(name='regressor',
     package_dir={'': 'src'},
     install_requires=[
         'numpy',
+        'scipy',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
     ],
     ext_modules=ext,
-    tests_require=[
-        'scipy',
-    ],
     test_loader='unittest:TestLoader',
     )
