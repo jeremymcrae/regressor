@@ -7,6 +7,7 @@ python:
  - 3.8
 
 install:
+ - pip install --only-binary=all cython
  - pip install -e .
 script:
  - python setup.py test
