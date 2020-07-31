@@ -1,7 +1,7 @@
 
 #include <cmath>
 #include <cstdint>
-#include <exception>
+#include <stdexcept>
 #include <algorithm>
 
 #include <immintrin.h>
