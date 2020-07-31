@@ -7,6 +7,6 @@ python:
  - 3.8
 
 before_install:
- - python setup.py install
+ - pip install -e .
 script:
  - python setup.py test
