@@ -25,8 +25,9 @@ LinregressResult(slope=-1.0, intercept=6.0, rvalue=-1.0, pvalue=1.2e-30, stderr=
 ### Performance
 The graph below compares the times required for simple linear regressions between
 this package and scipy.stats.linregress, starting from arrays with 100 elements
-up to arrays with 100 million elements. In general, this package performs simple
-linear regression in about 1/15th of the time required by scipy.stats.linregress.
+up to arrays with 100 million elements. This was run on a 2.6 GHz Skylake CPU.
+In general, this package performs simple linear regression in about 1/15th of 
+the time required by scipy.stats.linregress.
 
 ![Performance](/docs/performance.svg)
 
