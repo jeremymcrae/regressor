@@ -1,15 +1,11 @@
 # cython: language_level=3, boundscheck=False, emit_linenums=True
 
-from collections import namedtuple
-
 from libcpp cimport bool
 from libc.stdint cimport uint32_t
 
-cimport numpy
 import numpy
+from jax.lax_linalg import svd
 from scipy.special import stdtr
-
-LinResult = namedtuple('LinregressResult', ['slope', 'intercept', 'rvalue', 'pvalue', 'stderr'])
 
 cdef extern from "covariance.h" namespace "regressor":
     cdef struct covmeans:
@@ -24,9 +20,37 @@ cdef extern from "covariance.h" namespace "regressor":
         double s_yy
         uint32_t size
     
-    covs covariance(float * x, const uint32_t & size_x, float * y, const uint32_t & size_y, bool sampled)
+    covs covariance(float * x, const uint32_t & size_x, float * y, const uint32_t & size_y, bool sampled) except +
 
-def linregress(numpy.ndarray[numpy.float32_t, mode="c"] x, numpy.ndarray[numpy.float32_t, mode="c"] y, bool sampled_means=False):
+class LinregressResult:
+    def __init__(self, beta, intercept, r, p_val, stderr):
+        self.beta = beta
+        self.intercept = intercept
+        self.rvalue = r
+        self.pvalue = p_val
+        self.stderr = stderr
+    
+    def __iter__(self):
+        for x in [self.beta, self.intercept, self.rvalue, self.pvalue, self.stderr]:
+            yield x
+    
+    # account for all the different names for the betas
+    @property
+    def slope(self):
+        return self.beta
+    @property
+    def coef_(self):
+        return self.beta
+    @property
+    def params(self):
+        return self.beta
+    
+    # allow using statsmodels attribute for the standard errors of the betas
+    @property
+    def bse(self):
+        return self.stderr
+
+def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):
     ''' perform simple linear regression on two float32 numpy arrays
     
     Args:
@@ -38,9 +62,6 @@ def linregress(numpy.ndarray[numpy.float32_t, mode="c"] x, numpy.ndarray[numpy.f
     Returns:
         LinregressResult with slope, intercept, r-value, p-value and standard error
     '''
-    x = numpy.ascontiguousarray(x)
-    y = numpy.ascontiguousarray(y)
-    
     vals = covariance(&x[0], len(x), &y[0], len(y), sampled_means)
     
     # the remainder is from the scipy.stats.linregress function
@@ -70,4 +91,57 @@ def linregress(numpy.ndarray[numpy.float32_t, mode="c"] x, numpy.ndarray[numpy.f
         prob = stdtr(df, -numpy.abs(t)) * 2
         stderr = numpy.sqrt((1 - r ** 2) * vals.s_yy / vals.s_xx / df)
     
-    return LinResult(slope, intercept, r, prob, stderr)
+    return LinregressResult(slope, intercept, r, prob, stderr)
+
+def linregress_full(float[:, ::1] endog, float[:] exog, bool has_intercept=False):
+    ''' run a linear regression with covariates
+    
+    This is much faster than running an OLS regression with statsmodels, and
+    on par with the scipy.linalg.lstsq(), except this also calculates standard
+    errors of the betas and p-values. If stderrs are required, this function is 
+    faster than running scipy.stats.lstsq before calculating stderrs, since those
+    would require calculating the endog.T @ endog dot product again.
+    '''
+    if not has_intercept:
+        endog = numpy.concatenate([endog, numpy.ones(len(endog), dtype=numpy.float32)[:, None]], axis=1)
+    
+    # compute betas. Store one dot product, to avoid later recomputation
+    dotted = numpy.dot(endog.T, endog)
+    betas = numpy.linalg.solve(dotted, numpy.dot(endog.T, exog))
+    
+    # use jax.lax_linalg.svd() for singular value decomposition, since this
+    # in turn calls the BCDSVD function from Eigen, which is fast
+    singular = svd(numpy.asarray(endog), full_matrices=False, compute_uv=False)
+    
+    # get the matrix rank from the SVD values. The shape is reversed compared to numpy code
+    rank = endog.shape[0] if endog.shape[0] > endog.shape[1] else endog.shape[1]
+    tol = singular.max(axis=-1, keepdims=True) * rank * numpy.finfo(singular.dtype).eps
+    matrix_rank = (singular > tol).sum(axis=-1)
+    
+    # calculate the degrees of freedom of the residuals
+    df_resid = endog.shape[0] - matrix_rank
+    
+    predicted = numpy.dot(endog, betas)
+    residuals = exog - predicted
+    scale = numpy.dot(residuals, residuals) / df_resid
+    cov_params = numpy.linalg.inv(dotted)
+    
+    stderr = numpy.sqrt(numpy.diag(scale * cov_params))
+    
+    p_values = numpy.array([stdtr(df_resid, -numpy.abs(a / b)) for a, b in zip(betas, stderr)]) * 2
+    
+    # give nan values for intercepts and rvalues, which are just present to match
+    # the simple linear regression attributes
+    intercepts = numpy.array([float('nan') * len(stderr)])
+    rvalues = numpy.array([float('nan') * len(stderr)])
+    
+    return LinregressResult(betas, intercepts, rvalues, p_values, stderr)
+
+def linregress(endog, exog, bool has_intercept=False):
+    ''' run linear regression on numpy arrays
+    '''
+    assert exog.ndim == 1
+    if endog.ndim == 1:
+        return linregress_simple(endog, exog)
+    else:
+        return linregress_full(endog, exog, has_intercept)

@@ -25,7 +25,8 @@ ext = cythonize([
         extra_compile_args=EXTRA_COMPILE_ARGS,
         extra_link_args=EXTRA_LINK_ARGS,
         sources=['src/regressor/regress.pyx',
-            'src/covariance.cpp',],
+            'src/covariance.cpp',
+            ],
         include_dirs=['src/', numpy.get_include()],
         language='c++'),
     ])
@@ -44,6 +45,7 @@ setup(name='regressor',
     install_requires=[
         'numpy',
         'scipy',
+        'jaxlib',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
