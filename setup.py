@@ -46,6 +46,7 @@ setup(name='regressor',
         'numpy',
         'scipy',
         'jaxlib',
+        'jax',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
