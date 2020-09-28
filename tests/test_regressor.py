@@ -40,6 +40,44 @@ class TestRegressor(unittest.TestCase):
             self.assertAlmostEqual(old.pvalue, new.pvalue, places=5)
             self.assertAlmostEqual(old.stderr, new.stderr, delta=1e-5)
 
+    def test_linregress_small(self):
+        ''' check results from small arrays
+        '''
+        a = numpy.ones(0, dtype=numpy.float32)
+        res = linregress_fast(a, a)
+        self.assertTrue(numpy.isnan(res.slope))
+        self.assertTrue(numpy.isnan(res.intercept))
+        self.assertTrue(numpy.isnan(res.rvalue))
+        self.assertTrue(numpy.isnan(res.pvalue))
+        self.assertTrue(numpy.isnan(res.stderr))
+        
+        a = numpy.ones(1, dtype=numpy.float32)
+        res = linregress_fast(a, a)
+        self.assertTrue(numpy.isnan(res.slope))
+        self.assertTrue(numpy.isnan(res.intercept))
+        self.assertTrue(numpy.isnan(res.rvalue))
+        self.assertTrue(numpy.isnan(res.pvalue))
+        self.assertTrue(numpy.isnan(res.stderr))
+        
+        a = numpy.ones(2, dtype=numpy.float32)
+        res = linregress_fast(a, a)
+        self.assertTrue(numpy.isnan(res.slope))
+        self.assertTrue(numpy.isnan(res.intercept))
+        self.assertTrue(numpy.isnan(res.rvalue))
+        self.assertEqual(res.pvalue, 1.0)
+        self.assertEqual(res.stderr, 0.0)
+    
+    def test_linregress_no_variance(self)
+        ''' results are nan when all array values are identical
+        '''
+        a = numpy.ones(20, dtype=numpy.float32)
+        res = linregress_fast(a, a)
+        self.assertTrue(numpy.isnan(res.slope))
+        self.assertTrue(numpy.isnan(res.intercept))
+        self.assertTrue(numpy.isnan(res.rvalue))
+        self.assertTrue(numpy.isnan(res.pvalue))
+        self.assertTrue(numpy.isnan(res.stderr))
+
     def test_linregress_large(self):
         ''' regressor.linregress matches scipy.stats.linregress
         '''

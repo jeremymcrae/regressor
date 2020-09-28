@@ -64,9 +64,11 @@ def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):
     '''
     vals = covariance(&x[0], len(x), &y[0], len(y), sampled_means)
     
+    s_xx = vals.s_xx if vals.s_xx != 0 else float('nan')
+    
     # the remainder is from the scipy.stats.linregress function
     r_num = vals.s_xy
-    r_den = numpy.sqrt(vals.s_xx * vals.s_yy)
+    r_den = numpy.sqrt(s_xx * vals.s_yy)
     r = 0.0 if r_den == 0.0 else r_num / r_den
     
     # test for numerical error propagation
@@ -76,7 +78,7 @@ def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):
         r = -1.0
 
     df = len(x) - 2
-    slope = r_num / vals.s_xx
+    slope = r_num / s_xx
     intercept = vals.avg.y - slope * vals.avg.x
     if len(x) == 2:
         # handle case when only two points are passed in
@@ -89,7 +91,7 @@ def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):
         TINY = 1e-20
         t = r * numpy.sqrt(df / ((1.0 - r + TINY) * (1.0 + r + TINY)))
         prob = stdtr(df, -numpy.abs(t)) * 2
-        stderr = numpy.sqrt((1 - r ** 2) * vals.s_yy / vals.s_xx / df)
+        stderr = numpy.sqrt((1 - r ** 2) * vals.s_yy / s_xx / df)
     
     return LinregressResult(slope, intercept, r, prob, stderr)
 
