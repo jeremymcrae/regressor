@@ -84,7 +84,7 @@ def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):
             prob = 1.0
         else:
             prob = 0.0
-        sterrest = 0.0
+        stderr = 0.0
     else:
         TINY = 1e-20
         t = r * numpy.sqrt(df / ((1.0 - r + TINY) * (1.0 + r + TINY)))
