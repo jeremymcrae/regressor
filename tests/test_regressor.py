@@ -50,7 +50,7 @@ class TestRegressor(unittest.TestCase):
         self.assertTrue(numpy.isnan(res.rvalue))
         self.assertTrue(numpy.isnan(res.pvalue))
         self.assertTrue(numpy.isnan(res.stderr))
-        
+
         a = numpy.ones(1, dtype=numpy.float32)
         res = linregress_fast(a, a)
         self.assertTrue(numpy.isnan(res.slope))
@@ -58,7 +58,7 @@ class TestRegressor(unittest.TestCase):
         self.assertTrue(numpy.isnan(res.rvalue))
         self.assertTrue(numpy.isnan(res.pvalue))
         self.assertTrue(numpy.isnan(res.stderr))
-        
+
         a = numpy.ones(2, dtype=numpy.float32)
         res = linregress_fast(a, a)
         self.assertTrue(numpy.isnan(res.slope))
@@ -66,7 +66,7 @@ class TestRegressor(unittest.TestCase):
         self.assertTrue(numpy.isnan(res.rvalue))
         self.assertEqual(res.pvalue, 1.0)
         self.assertEqual(res.stderr, 0.0)
-    
+
     def test_linregress_no_variance(self)
         ''' results are nan when all array values are identical
         '''
