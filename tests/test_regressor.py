@@ -67,7 +67,7 @@ class TestRegressor(unittest.TestCase):
         self.assertEqual(res.pvalue, 1.0)
         self.assertEqual(res.stderr, 0.0)
 
-    def test_linregress_no_variance(self)
+    def test_linregress_no_variance(self):
         ''' results are nan when all array values are identical
         '''
         a = numpy.ones(20, dtype=numpy.float32)
