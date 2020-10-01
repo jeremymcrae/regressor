@@ -9,8 +9,8 @@ from scipy.special import stdtr
 
 cdef extern from "covariance.h" namespace "regressor":
     cdef struct covmeans:
-        float x
-        float y
+        double x
+        double y
     
     cdef struct covs:
         covmeans avg
@@ -23,31 +23,41 @@ cdef extern from "covariance.h" namespace "regressor":
     covs covariance(float * x, const uint32_t & size_x, float * y, const uint32_t & size_y, bool sampled) except +
 
 class LinregressResult:
-    def __init__(self, beta, intercept, r, p_val, stderr):
-        self.beta = beta
+    def __init__(self, slope, intercept, rvalue, pvalue, stderr):
+        self.slope = slope
         self.intercept = intercept
-        self.rvalue = r
-        self.pvalue = p_val
+        self.rvalue = rvalue
+        self.pvalue = pvalue
         self.stderr = stderr
+    
+    def __repr__(self):
+        return f'LinregressResult(slope={self.beta}, intercept={self.intercept}, ' \
+            f'rvalue={self.rvalue}, pvalue={self.pvalue}, stderr={self.stderr})'
     
     def __iter__(self):
         for x in [self.beta, self.intercept, self.rvalue, self.pvalue, self.stderr]:
             yield x
     
-    # account for all the different names for the betas
     @property
-    def slope(self):
-        return self.beta
+    def beta(self):
+        ''' alternative name for the slope
+        '''
+        return self.slope
     @property
     def coef_(self):
+        ''' alternative name for beta, used by scikit LinearRegression
+        '''
         return self.beta
     @property
     def params(self):
+        ''' alternative name for beta, used by statsmodels OLS
+        '''
         return self.beta
     
-    # allow using statsmodels attribute for the standard errors of the betas
     @property
     def bse(self):
+        ''' alternative name for standard errors attribute, used by statsmodels
+        '''
         return self.stderr
 
 def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):

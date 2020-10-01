@@ -6,8 +6,8 @@
 namespace regressor {
 
 struct covmeans {
-  float x;
-  float y;
+  double x;
+  double y;
 };
 
 struct covs {
@@ -21,6 +21,7 @@ struct covs {
 
 // get covariance values from two same-sized float arrays
 covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y, bool sampled);
+covs covariance_higher_precision(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y, bool sampled);
 
 } // namespace regressor
 
