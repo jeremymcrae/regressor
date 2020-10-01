@@ -57,19 +57,21 @@ input array size. Here's some code to demonstrate the issue:
 >>> from regressor import linregress as linreg2
 
 >>> a = numpy.array([0.49789444, 0.12506859, 0.75386035, 0.025621228, 0.00039564757,
-    0.71248668, 0.078348994, 0.62318009, 0.48770180], dtype=numpy.float32)
+        0.71248668, 0.078348994, 0.62318009, 0.48770180], dtype=numpy.float32)
 >>> b = numpy.copy(a)
 >>> eps = numpy.finfo(numpy.float32).eps
 
 >>> linreg2(a, b)
 LinregressResult(slope=1.0, intercept=0.0, rvalue=1.0, pvalue=3.292585384803146e-70, stderr=0.0)
 >>> linreg2(a, b + eps)
-LinregressResult(slope=0.9999999999999959, intercept=9.271833784074701e-08, rvalue=0.9999999999999959, pvalue=1.4627920285341798e-50, stderr=3.425878486341894e-08)
+LinregressResult(slope=0.9999999999999959, intercept=9.271833784074701e-08, 
+    rvalue=0.9999999999999959, pvalue=1.4627920285341798e-50, stderr=3.425878486341894e-08)
 
 >>> linregress(a, b)
 LinregressResult(slope=1.0, intercept=0.0, rvalue=1.0, pvalue=3.292585384803146e-70, stderr=0.0)
 >>> linregress(a, b + eps)
-LinregressResult(slope=1.0, intercept=1.1920928955078125e-07, rvalue=1.0, pvalue=3.292585384803146e-70, stderr=0.0)
+LinregressResult(slope=1.0, intercept=1.1920928955078125e-07, rvalue=1.0, 
+    pvalue=3.292585384803146e-70, stderr=0.0)
 ```
 
 This behavior only occurs when the input arrays have at least 9 values (and
@@ -81,9 +83,11 @@ some code to demonstrate:
 ```py
 >>> b[0] += eps
 >>> linreg2(a, b)
-LinregressResult(slope=1.000000020527417, intercept=-7.537115487288304e-09, rvalue=0.9999999999999909, pvalue=2.37040745003888e-49, stderr=5.100092205240057e-08)
+LinregressResult(slope=1.000000020527417, intercept=-7.537115487288304e-09, 
+    rvalue=0.9999999999999909, pvalue=2.37040745003888e-49, stderr=5.100092205240057e-08)
 >>> linreg2(a, b)
-LinregressResult(slope=1.0000000205274189, intercept=2.2265206844895857e-08, rvalue=0.9999999999999918, pvalue=1.6549532101768438e-49, stderr=4.844923917880737e-08)
+LinregressResult(slope=1.0000000205274189, intercept=2.2265206844895857e-08, 
+    rvalue=0.9999999999999918, pvalue=1.6549532101768438e-49, stderr=4.844923917880737e-08)
 ```
 
 Ignore the different intercepts, regressor or scipy.stats.linregress are both
