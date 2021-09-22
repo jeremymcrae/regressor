@@ -124,6 +124,7 @@ def linregress_full(float[:, ::1] endog, float[:] exog, bool has_intercept=False
     dotted = numpy.dot(endog.T, endog)
     betas = numpy.linalg.solve(dotted, numpy.dot(endog.T, exog))
     
+    global svd
     if 'XDG_DATA_DIRS' in os.environ:
         # this is a crude check to see if the code is running on a head node,
         # which for some reason segfaults with the jax-based SVD. This was with 
