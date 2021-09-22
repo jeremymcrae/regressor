@@ -155,7 +155,20 @@ def linregress_full(float[:, ::1] endog, float[:] exog, bool has_intercept=False
 def linregress(endog, exog, bool has_intercept=False):
     ''' run linear regression on numpy arrays
     '''
-    assert exog.ndim == 1
+    assert exog.ndim == 1, 'y-values must be single dimension'
+    
+    # make sure arrays have contiguous data
+    if not endog.flags['C_CONTIGUOUS']:
+        endog = numpy.ascontiguousarray(endog)
+    if not exog.flags['C_CONTIGUOUS']:
+        exog = numpy.ascontiguousarray(exog)
+    
+    # make sure data is 32-bit floats
+    if endog.dtype == numpy.float64:
+        endog = endog.astype(numpy.float32)
+    if exog.dtype == numpy.float64:
+        exog = exog.astype(numpy.float32)
+    
     if endog.ndim == 1:
         return linregress_simple(endog, exog)
     else:
