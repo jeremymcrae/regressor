@@ -45,8 +45,8 @@ setup(name='regressor',
     install_requires=[
         'numpy',
         'scipy',
-        'jaxlib==0.1.46',
-        'jax==0.1.64',
+        'jaxlib',
+        'jax>=0.2.6',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

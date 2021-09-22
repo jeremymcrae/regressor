@@ -4,7 +4,7 @@ from libcpp cimport bool
 from libc.stdint cimport uint32_t
 
 import numpy
-from numpy.linalg import svd
+from jax.lax.linalg import svd
 from scipy.special import stdtr
 
 cdef extern from "covariance.h" namespace "regressor":
