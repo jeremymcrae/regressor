@@ -136,7 +136,10 @@ def linregress_full(float[:, ::1] endog, float[:] exog, bool has_intercept=False
     predicted = numpy.dot(endog, betas)
     residuals = exog - predicted
     scale = numpy.dot(residuals, residuals) / df_resid
-    cov_params = numpy.linalg.inv(dotted)
+    try:
+        cov_params = numpy.linalg.inv(dotted)
+    except numpy.linalg.LinAlgError:
+        cov_params = numpy.linalg.pinv(dotted)
     
     stderr = numpy.sqrt(numpy.diag(scale * cov_params))
     
