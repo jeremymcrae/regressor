@@ -6,8 +6,7 @@ from libcpp cimport bool
 from libc.stdint cimport uint32_t
 
 import numpy
-from jax.lax.linalg import svd
-from numpy.linalg import svd as svd_numpy
+from scipy.linalg import svd
 from scipy.special import stdtr
 
 cdef extern from "covariance.h" namespace "regressor":
@@ -124,18 +123,7 @@ def linregress_full(float[:, ::1] endog, float[:] exog, bool has_intercept=False
     dotted = numpy.dot(endog.T, endog)
     betas = numpy.linalg.solve(dotted, numpy.dot(endog.T, exog))
     
-    global svd
-    if 'XDG_DATA_DIRS' in os.environ:
-        # this is a crude check to see if the code is running on a head node,
-        # which for some reason segfaults with the jax-based SVD. This was with 
-        # jax 0.2.20, and jaxlib 0.1.69. It looks like jax starts too many 
-        # threads for the head node. I tried restricting jax (and the eigen
-        # process therein) to fewer threads, but didn't seem to work. Currently
-        # if this check fails we use the numpy svd as backup
-        svd = svd_numpy
-    
-    # use jax.lax_linalg.svd() for singular value decomposition, since this
-    # in turn calls the BCDSVD function from Eigen, which is fast
+    # use scipy.linalg.svd() which is faster than numpy and jax at same thread count
     singular = svd(numpy.asarray(endog), full_matrices=False, compute_uv=False)
     
     # get the matrix rank from the SVD values. The shape is reversed compared to numpy code
