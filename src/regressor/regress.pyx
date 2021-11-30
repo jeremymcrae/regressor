@@ -1,6 +1,7 @@
 # cython: language_level=3, boundscheck=False, emit_linenums=True
 
 import os
+import warnings
 
 from libcpp cimport bool
 from libc.stdint cimport uint32_t
@@ -107,7 +108,7 @@ def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):
     
     return LinregressResult(slope, intercept, r, prob, stderr)
 
-def linregress_full(float[:, ::1] endog, float[:] exog, bool has_intercept=False):
+def linregress_full(float[::1, :] endog, float[:] exog, bool has_intercept=False):
     ''' run a linear regression with covariates
     
     This is much faster than running an OLS regression with statsmodels, and
@@ -159,10 +160,15 @@ def linregress(endog, exog, bool has_intercept=False):
     assert exog.ndim == 1, 'y-values must be single dimension'
     
     # make sure arrays have contiguous data
-    if not endog.flags['C_CONTIGUOUS']:
-        endog = numpy.ascontiguousarray(endog)
-    if not exog.flags['C_CONTIGUOUS']:
-        exog = numpy.ascontiguousarray(exog)
+    if not endog.flags['F_CONTIGUOUS']:
+        # comvert to fortran contiguous, since the SVD step in the multiple 
+        # regression requires fortran-oriented arrays.
+        endog = numpy.asfortranarray(endog)
+        if endog.ndim > 1:
+            warnings.warn('if running many regressions with the x-values (endog), ' \
+                'convert via np.asfortranarray() before linregress() to save time.')
+    if not exog.flags['F_CONTIGUOUS']:
+        exog = numpy.asfortranarray(exog)
     
     # make sure data is 32-bit floats
     if endog.dtype == numpy.float64:
