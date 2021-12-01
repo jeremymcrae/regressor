@@ -46,6 +46,10 @@ setup(name='regressor',
         'numpy',
         'scipy',
     ],
+    tests_require=[
+        'statsmodels',
+        'sklearn',
+    ]
     classifiers=[
         'Development Status :: 4 - Beta',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
