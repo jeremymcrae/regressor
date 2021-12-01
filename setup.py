@@ -49,7 +49,7 @@ setup(name='regressor',
     tests_require=[
         'statsmodels',
         'sklearn',
-    ]
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
