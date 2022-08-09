@@ -65,7 +65,7 @@ class TestRegressorMulitple(unittest.TestCase):
         # around 0.5). Float differences accumulate to around 2e-6 at most, 
         # which makes a bigger relative difference for betas near zero.
         abs_diff = difference(lstsq_fit[0][:-1], regressor_fit.coef_[:-1])
-        self.assertTrue(abs_diff.max() < 5e-6)
+        self.assertTrue(abs_diff.max() < 1e-5)
         
         # check the p-values are nearly identical in log10 space, and correlate
         p_delta = abs(numpy.log10(regressor_fit.pvalue) - numpy.log10(sm_fit.pvalues))
@@ -87,7 +87,7 @@ class TestRegressorMulitple(unittest.TestCase):
             self.assertTrue(corr > 0.99999)
             
             abs_diff = difference(lstsq_fit[0][:-1], regressor_fit.coef_[:-1])
-            self.assertTrue(abs_diff.max() < 5e-6)
+            self.assertTrue(abs_diff.max() < 1e-5)
     
     def test_regression_correlated(self):
         ''' check multiple regresion, where y-values depend on the x columns
