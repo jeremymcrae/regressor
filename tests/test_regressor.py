@@ -54,7 +54,9 @@ class TestRegressor(unittest.TestCase):
                 d_stderr, a_stderr = get_delta(old.stderr, new.stderr)
 
                 self.assertTrue(d_slope < 1.0002)
-                self.assertTrue(d_intercept < 1.01, d_intercept)
+                self.assertTrue(d_intercept < 1.01, 
+                                f'intercepts differ - relative diff: {d_intercept}, ' \
+                                f'absolute diff : {a_intercept}')
                 self.assertTrue(d_rvalue < 1.0005)
                 self.assertTrue(d_pvalue < 1.005)
                 self.assertTrue(a_stderr < 1e-5)
