@@ -69,7 +69,7 @@ class TestRegressorMulitple(unittest.TestCase):
         
         # check the p-values are nearly identical in log10 space, and correlate
         p_delta = abs(numpy.log10(regressor_fit.pvalue) - numpy.log10(sm_fit.pvalues))
-        self.assertTrue(p_delta.max() < 1e-3)
+        self.assertTrue(p_delta.max() < 2e-3)
         corr = numpy.corrcoef(numpy.log10(regressor_fit.pvalue), numpy.log10(sm_fit.pvalues))[0, 1] ** 2
         self.assertTrue(corr > 0.9999999)
     
