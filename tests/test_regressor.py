@@ -59,7 +59,7 @@ class TestRegressor(unittest.TestCase):
                                 f'absolute diff : {a_intercept}')
                 self.assertTrue(d_rvalue < 1.0005)
                 self.assertTrue(d_pvalue < 1.005)
-                self.assertTrue(a_stderr < 1e-5)
+                self.assertTrue(a_stderr < 2e-5)
 
     def test_linregress_small(self):
         ''' check results from small arrays
