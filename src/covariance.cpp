@@ -10,54 +10,9 @@
 
 namespace regressor {
 
-/// estimate mean by sampling from the values
-///
-/// this estimates the mean from  a subsample of values. The estimate is
-/// returned when a subsequent batch doesn't change the estimated mean by some
-/// tolerance.
-///
-/// This can be 2X faster than calculating the average from all values.
-///
-/// @param vals array of 32-bit floats
-/// @param size size of vals array
-/// @param tol tolerance for accepting the estimated mean from batches
-/// @returns estimated mean as float
-float estimate_mean(float * vals, const std::uint32_t & size, float tol=1e-4) {
-  
-  // figure out how many samples to take per batch. If the array has less than
-  // 1000 entries use the full array length, and use each item. If the array has
-  // >1000 items, use at least 1000 samples per batch, or 1% of the array length,
-  // whichever is greater. Making it at least 1% of the array length ensures the
-  // estimate is close to the true mean in large arrays (>10 million items).
-  long n_sampled = std::max((long) size / 100, (long) 1000);
-  size_t batchsize = std::min(n_sampled, (long) size);
-  size_t stride = std::max(size / batchsize, (unsigned long) 1);
-  
-  float total = 0;
-  double mean = 0.0;
-  float current;
-  float delta;
-  
-  // TODO: this could probably also be vectorised to reduce memory accesses
-  for (size_t i=0; i<stride; i++) {
-    for (size_t j=i; j<size; j += stride) {
-      total += vals[j];
-    }
-    current = total / ((i + 1) * batchsize);
-    delta = std::abs(1.0 - current / mean);
-    if (mean != 0.0 & delta < tol) {
-      return current;
-    }
-    mean = current;
-  }
-  
-  return mean;
-}
-
 /// get means of two samed-sized float arrays
 ///
-/// This estimates the mean from a subsample of values, if allowed. Otherwise
-/// the mean is calculated from the full arrays with AVX operations.
+/// The mean is calculated from the full arrays with AVX operations.
 /// It's slightly faster to sum both arrays at once, whch I think is due to
 /// higher throughput of AVX operations
 ///
@@ -65,16 +20,10 @@ float estimate_mean(float * vals, const std::uint32_t & size, float tol=1e-4) {
 /// @param size_x size of x-values array
 /// @param y array of y-values
 /// @param size_y size of y-values array
-/// @param sampled whether to estimate the means of the arrays
 /// @returns covmeans struct with x and y means
-covmeans covariance_means(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y, bool & sampled) {
+covmeans covariance_means(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y) {
   if (size_x != size_y) {
     throw std::invalid_argument("arrays do not have same length");
-  }
-  
-  if (sampled) {
-    // use estimated mean for faster speed
-    return {estimate_mean(x, size_x), estimate_mean(y, size_y)};
   }
   
   __m256 x_vals, y_vals;
@@ -117,9 +66,8 @@ covmeans covariance_means(float * x, const std::uint32_t & size_x, float * y, co
 /// @param size_x size of x-values array
 /// @param y array of y-values
 /// @param size_y size of y-values array
-/// @param sampled whether to estimate the means of the arrays
 /// @returns covmeans struct with sums of squares for x^2, x*y, y^2 and averages
-covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y, bool sampled) {
+covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y) {
   if (size_x != size_y) {
     throw std::invalid_argument("arrays do not have same length");
   }
@@ -128,10 +76,10 @@ covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::u
     // to doubles during calculations, in order to avoid an edge case of discrepant
     // results with small arrays when the arrays are near identical, and differ
     // by some scalar increment.
-    return covariance_higher_precision(x, size_x, y, size_y, sampled);
+    return covariance_higher_precision(x, size_x, y, size_y);
   }
 
-  covmeans mu = covariance_means(x, size_x, y, size_y, sampled);
+  covmeans mu = covariance_means(x, size_x, y, size_y);
   
   __m256 x_means = {(float) mu.x, (float) mu.x, (float) mu.x, (float) mu.x, (float) mu.x, (float) mu.x, (float) mu.x, (float) mu.x};
   __m256 y_means = {(float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y};
@@ -198,14 +146,13 @@ covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::u
 /// @param size_x size of x-values array
 /// @param y array of y-values
 /// @param size_y size of y-values array
-/// @param sampled whether to estimate the means of the arrays
 /// @returns covmeans struct with sums of squares for x^2, x*y, y^2 and averages
-covs covariance_higher_precision(float *x, const std::uint32_t &size_x, float *y, const std::uint32_t &size_y, bool sampled)
+covs covariance_higher_precision(float *x, const std::uint32_t &size_x, float *y, const std::uint32_t &size_y)
 {
   if (size_x != size_y) {
     throw std::invalid_argument("arrays do not have same length");
   }
-  covmeans mu = covariance_means(x, size_x, y, size_y, sampled);
+  covmeans mu = covariance_means(x, size_x, y, size_y);
 
   __m256d x_means = {mu.x, mu.x, mu.x, mu.x};
   __m256d y_means = {mu.y, mu.y, mu.y, mu.y};

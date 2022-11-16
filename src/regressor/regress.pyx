@@ -23,7 +23,7 @@ cdef extern from "covariance.h" namespace "regressor":
         double s_yy
         uint32_t size
     
-    covs covariance(float * x, const uint32_t & size_x, float * y, const uint32_t & size_y, bool sampled) except +
+    covs covariance(float * x, const uint32_t & size_x, float * y, const uint32_t & size_y) except +
 
 class LinregressResult:
     def __init__(self, slope, intercept, rvalue, pvalue, stderr):
@@ -63,19 +63,17 @@ class LinregressResult:
         '''
         return self.stderr
 
-def linregress_simple(float[::1] x, float[::1] y, bool sampled_means=False):
+def linregress_simple(float[::1] x, float[::1] y):
     ''' perform simple linear regression on two float32 numpy arrays
     
     Args:
         x: numpy array of x-values (as numpy.float32 dtype)
         y: numpy array of y-values (as numpy.float32 dtype)
-        sampled_means: estimate x and y means from samples. Use for faster speed,
-            at the trade-off of slightly less precise beta and p-value.
     
     Returns:
         LinregressResult with slope, intercept, r-value, p-value and standard error
     '''
-    vals = covariance(&x[0], len(x), &y[0], len(y), sampled_means)
+    vals = covariance(&x[0], len(x), &y[0], len(y))
     
     s_xx = vals.s_xx if vals.s_xx != 0 else float('nan')
     

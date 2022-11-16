@@ -20,8 +20,8 @@ struct covs {
 };
 
 // get covariance values from two same-sized float arrays
-covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y, bool sampled);
-covs covariance_higher_precision(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y, bool sampled);
+covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y);
+covs covariance_higher_precision(float * x, const std::uint32_t & size_x, float * y, const std::uint32_t & size_y);
 
 } // namespace regressor
 
