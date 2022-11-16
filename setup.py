@@ -51,7 +51,7 @@ setup(name='regressor',
     ],
     tests_require=[
         'statsmodels',
-        'sklearn',
+        'scikit-learn',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
