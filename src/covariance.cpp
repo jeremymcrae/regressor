@@ -100,17 +100,14 @@ covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::u
     __m256 y_means = {(float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y, (float) mu.y};
     
     __m256 x_vals, y_vals;
-    __m256 x_vals2, y_vals2;
     __m256 _s_xx = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     __m256 _s_xy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     __m256 _s_yy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     
     // calculate sums of x^2, xy, and y**2 in batches of 16
-    for ( ; i + 16 < size_x; i += 16) {
+    for ( ; i + 16 < size_x; i += 8) {
       x_vals = _mm256_loadu_ps(&x[i]);
-      x_vals2 = _mm256_loadu_ps(&x[i + 8]);
       y_vals = _mm256_loadu_ps(&y[i]);
-      y_vals2 = _mm256_loadu_ps(&y[i + 8]);
 
       x_vals = _mm256_sub_ps(x_vals, x_means);
       y_vals = _mm256_sub_ps(y_vals, y_means);
@@ -118,13 +115,6 @@ covs covariance(float * x, const std::uint32_t & size_x, float * y, const std::u
       _s_xx = _mm256_fmadd_ps(x_vals, x_vals, _s_xx);
       _s_xy = _mm256_fmadd_ps(x_vals, y_vals, _s_xy);
       _s_yy = _mm256_fmadd_ps(y_vals, y_vals, _s_yy);
-
-      x_vals2 = _mm256_sub_ps(x_vals2, x_means);
-      y_vals2 = _mm256_sub_ps(y_vals2, y_means);
-
-      _s_xx = _mm256_fmadd_ps(x_vals2, x_vals2, _s_xx);
-      _s_xy = _mm256_fmadd_ps(x_vals2, y_vals2, _s_xy);
-      _s_yy = _mm256_fmadd_ps(y_vals2, y_vals2, _s_yy);
     }
 
     // add in vectorized sums
@@ -179,13 +169,12 @@ covs covariance_higher_precision(float *x, const std::uint32_t &size_x, float *y
 
     __m128 x128, y128;
     __m256d x_vals, y_vals;
-    __m256d x_vals2, y_vals2;
     __m256d _s_xx = {0.0, 0.0, 0.0, 0.0};
     __m256d _s_xy = {0.0, 0.0, 0.0, 0.0};
     __m256d _s_yy = {0.0, 0.0, 0.0, 0.0};
 
     // calculate sums of x^2, xy, and y**2 in batches of 8
-    for (; i + 8 < size_x; i += 8) {
+    for (; i + 4 < size_x; i += 4) {
       x128 = _mm_loadu_ps(&x[i]);
       y128 = _mm_loadu_ps(&y[i]);
 
@@ -195,22 +184,9 @@ covs covariance_higher_precision(float *x, const std::uint32_t &size_x, float *y
       x_vals = _mm256_sub_pd(x_vals, x_means);
       y_vals = _mm256_sub_pd(y_vals, y_means);
 
-      x128 = _mm_loadu_ps(&x[i + 4]);
-      y128 = _mm_loadu_ps(&y[i + 4]);
-
-      x_vals2 = _mm256_cvtps_pd(x128);
-      y_vals2 = _mm256_cvtps_pd(y128);
-
       _s_xx = _mm256_fmadd_pd(x_vals, x_vals, _s_xx);
       _s_xy = _mm256_fmadd_pd(x_vals, y_vals, _s_xy);
       _s_yy = _mm256_fmadd_pd(y_vals, y_vals, _s_yy);
-
-      x_vals2 = _mm256_sub_pd(x_vals2, x_means);
-      y_vals2 = _mm256_sub_pd(y_vals2, y_means);
-
-      _s_xx = _mm256_fmadd_pd(x_vals2, x_vals2, _s_xx);
-      _s_xy = _mm256_fmadd_pd(x_vals2, y_vals2, _s_xy);
-      _s_yy = _mm256_fmadd_pd(y_vals2, y_vals2, _s_yy);
     }
 
     // add in vectorized sums
