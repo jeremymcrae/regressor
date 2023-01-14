@@ -8,7 +8,7 @@ from distutils.core import Extension
 from Cython.Build import cythonize
 import numpy
 
-EXTRA_COMPILE_ARGS = ['-std=c++11']
+EXTRA_COMPILE_ARGS = ['-std=c++11', '-O2']
 EXTRA_LINK_ARGS = []
 if sys.platform == "darwin":
     EXTRA_COMPILE_ARGS += [
