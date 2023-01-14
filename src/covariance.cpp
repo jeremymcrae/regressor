@@ -12,11 +12,65 @@
 
 namespace regressor {
 
+// sum array of floats with vectorised operations
+//
+// We need to load the data into vector registers, but we need to convert the
+// float vectors to doubles for numerical stability, otherwise the sum can be
+// very inaccurate across many large values. Note that this is not seen if
+// using a naive sum of each float in turn, presumably as the CPU uses 64 or 80-bit
+// operations.
+//
+// I tried using __m256 float vectors, and got inaccurate sums with large values.
+// I tried Kahan summation (see https://en.wikipedia.org/wiki/Kahan_summation),
+// and got same sums using this function, a naive sum, or Kahan summation.
+//
+/// @param x array of floats
+/// @param size size of array
+/// @returns sum of array
+double fast_sum(float * x, const std::uint32_t & size) {
+  size_t i = 0;
+  double total = 0.0;
+
+#if defined(__x86_64__)
+  if (__builtin_cpu_supports("avx2")) {
+    double arr[4];
+    __m256d _vals1, _vals2, _vals3, _vals4;
+    __m256d _sum1 = {0.0, 0.0, 0.0, 0.0};
+    __m256d _sum2 = {0.0, 0.0, 0.0, 0.0};
+    __m256d _sum3 = {0.0, 0.0, 0.0, 0.0};
+    __m256d _sum4 = {0.0, 0.0, 0.0, 0.0};
+    // unroll loops for ~2.7-fold faster summation than with step size of 4
+    for (; i + 16 < size; i += 16) {
+      // load float vectors and convert to doubles
+      _vals1 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i]));
+      _vals2 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i + 4]));
+      _vals3 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i + 8]));
+      _vals4 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i+12]));
+
+      _sum1 = _mm256_add_pd(_sum1, _vals1);
+      _sum2 = _mm256_add_pd(_sum2, _vals2);
+      _sum3 = _mm256_add_pd(_sum3, _vals3);
+      _sum4 = _mm256_add_pd(_sum4, _vals4);
+    }
+    _mm256_storeu_pd(arr, _sum1);
+    total += arr[0] + arr[1] + arr[2] + arr[3];
+    _mm256_storeu_pd(arr, _sum2);
+    total += arr[0] + arr[1] + arr[2] + arr[3];
+    _mm256_storeu_pd(arr, _sum3);
+    total += arr[0] + arr[1] + arr[2] + arr[3];
+    _mm256_storeu_pd(arr, _sum4);
+    total += arr[0] + arr[1] + arr[2] + arr[3];
+  }
+#endif
+
+  // include the reimainder not used during vectorised sum
+  for ( ; i < size; i++) {
+    total += x[i];
+  }
+  return total;
+}
+
 /// get means of two samed-sized float arrays
-///
-/// The mean is calculated from the full arrays with AVX operations.
-/// It's slightly faster to sum both arrays at once, whch I think is due to
-/// higher throughput of AVX operations
 ///
 /// @param x array of x-values
 /// @param size_x size of x-values array
@@ -28,38 +82,7 @@ covmeans covariance_means(float * x, const std::uint32_t & size_x, float * y, co
     throw std::invalid_argument("arrays do not have same length");
   }
 
-  size_t i = 0;
-  double x_mu = 0.0;
-  double y_mu = 0.0;
-
-#if defined(__x86_64__)
-  if (__builtin_cpu_supports("avx2")) {
-    __m256 x_vals, y_vals;
-    __m256 x_sum = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    __m256 y_sum = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    for (; i + 8 < size_x; i += 8) {
-      x_vals = _mm256_loadu_ps(&x[i]);
-      y_vals = _mm256_loadu_ps(&y[i]);
-      x_sum = _mm256_add_ps(x_sum, x_vals);
-      y_sum = _mm256_add_ps(y_sum, y_vals);
-    }
-
-    // sum both arrays
-    float arr[8];
-    _mm256_storeu_ps(arr, x_sum);
-    x_mu += arr[0] + arr[1] + arr[2] + arr[3] + arr[4] + arr[5] + arr[6] + arr[7];
-    _mm256_storeu_ps(arr, y_sum);
-    y_mu += arr[0] + arr[1] + arr[2] + arr[3] + arr[4] + arr[5] + arr[6] + arr[7];
-  }
-#endif
-
-  // include the reimainder not used during vectorised sum
-  for ( ; i < size_x; i++) {
-    x_mu += x[i];
-    y_mu += y[i];
-  }
-  
-  return {x_mu / size_x, y_mu / size_x};
+  return {fast_sum(x, size_x) / size_x, fast_sum(y, size_y) / size_x};
 }
 
 /// get covariance values from two same-sized float arrays.
