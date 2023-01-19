@@ -45,7 +45,7 @@ double fast_sum(float * x, const std::uint32_t & size) {
       _vals1 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i]));
       _vals2 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i + 4]));
       _vals3 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i + 8]));
-      _vals4 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i+12]));
+      _vals4 = _mm256_cvtps_pd(_mm_loadu_ps(&x[i + 12]));
 
       _sum1 = _mm256_add_pd(_sum1, _vals1);
       _sum2 = _mm256_add_pd(_sum2, _vals2);
