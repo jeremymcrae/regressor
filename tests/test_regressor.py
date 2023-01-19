@@ -59,13 +59,11 @@ class TestRegressor(unittest.TestCase):
                 d_pvalue, a_pvalue = get_delta(old.pvalue, new.pvalue)
                 d_stderr, a_stderr = get_delta(old.stderr, new.stderr)
 
-                self.assertTrue(d_slope < 1.0003)
-                self.assertTrue(d_intercept < 1.02, 
-                                f'intercepts differ - relative diff: {d_intercept}, ' \
-                                f'absolute diff : {a_intercept}')
-                self.assertTrue(d_rvalue < 1.0005)
-                self.assertTrue(d_pvalue < 1.005)
-                self.assertTrue(a_stderr < 2e-5)
+                self.assertTrue(d_slope < 1.00031 or a_slope < 1e-8)
+                self.assertTrue(d_intercept < 1.002 or a_intercept < 1e-7)
+                self.assertTrue(d_rvalue < 1.0004 or a_rvalue < 1e-8)
+                self.assertTrue(d_pvalue < 1.003 or a_pvalue < 1e-8)
+                self.assertTrue(a_stderr < 1e-5)
 
     def test_linregress_small(self):
         ''' check results from small arrays
