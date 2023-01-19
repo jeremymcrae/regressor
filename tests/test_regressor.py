@@ -25,6 +25,11 @@ def get_delta(old, new):
 
     Ensures greater numeric similarity than what the standard checks permit.
     '''
+    # check the values have the same sign
+    assert ((old == new) & (old == 0)) | ((old >= 0) & (new >= 0)) | ((old * new) > 0)
+    old = abs(old)
+    new = abs(new)
+
     hi = max(old, new)
     lo = min(old, new)
 
