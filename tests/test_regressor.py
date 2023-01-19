@@ -48,6 +48,7 @@ class TestRegressor(unittest.TestCase):
         for n in [3, 10, 100, 1000, 10000, 100000]:
             for r2 in numpy.linspace(0, 1, 1000):
                 a, b = make_correlated(n, r2)
+                b += 1
 
                 old = linregress(a, b)
                 new = linregress_fast(a, b)
