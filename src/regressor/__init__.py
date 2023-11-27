@@ -1,6 +1,7 @@
-from pkg_resources import get_distribution
+from importlib.metadata import version
 
-__version__ = get_distribution('regressor').version
+__name__ == 'regressor'
+__version__ = version(__name__)
 
 try:
     import mkl
