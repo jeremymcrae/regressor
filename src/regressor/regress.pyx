@@ -5,10 +5,11 @@ import warnings
 
 from libcpp cimport bool
 from libc.stdint cimport uint32_t
+from libc.math cimport fabs, sqrt
 
 import numpy
 from scipy.linalg import svd
-from scipy.special import stdtr
+from scipy.special.cython_special cimport stdtr
 
 cdef extern from "covariance.h" namespace "regressor":
     cdef struct covmeans:
@@ -75,12 +76,14 @@ def linregress_simple(float[::1] x, float[::1] y):
     '''
     vals = covariance(&x[0], len(x), &y[0], len(y))
     
-    s_xx = vals.s_xx if vals.s_xx != 0 else float('nan')
-    
+    # s_xx = vals.s_xx if vals.s_xx != 0 else float('nan')
     # the remainder is from the scipy.stats.linregress function
-    r_num = vals.s_xy
-    r_den = numpy.sqrt(s_xx * vals.s_yy)
-    r = 0.0 if r_den == 0.0 else r_num / r_den
+    cdef double r_num = vals.s_xy
+    cdef double s_xx = vals.s_xx
+    if s_xx == 0.0:
+        s_xx = float('nan')
+    cdef double r_den = sqrt(s_xx * vals.s_yy)
+    cdef double r = 0.0 if r_den == 0.0 else r_num / r_den
     
     # test for numerical error propagation
     if r > 1.0:
@@ -88,9 +91,10 @@ def linregress_simple(float[::1] x, float[::1] y):
     if r < -1.0:
         r = -1.0
 
-    df = len(x) - 2
-    slope = r_num / s_xx
-    intercept = vals.avg.y - slope * vals.avg.x
+    cdef double df = len(x) - 2
+    cdef double slope = r_num / s_xx
+    cdef double intercept = vals.avg.y - slope * vals.avg.x
+    cdef double TINY, t, prob, stderr
     if len(x) == 2:
         # handle case when only two points are passed in
         if y[0] == y[1]:
@@ -100,9 +104,9 @@ def linregress_simple(float[::1] x, float[::1] y):
         stderr = 0.0
     else:
         TINY = 1e-20
-        t = r * numpy.sqrt(df / ((1.0 - r + TINY) * (1.0 + r + TINY)))
-        prob = stdtr(df, -numpy.abs(t)) * 2
-        stderr = numpy.sqrt((1 - r ** 2) * vals.s_yy / s_xx / df)
+        t = r * sqrt(df / ((1.0 - r + TINY) * (1.0 + r + TINY)))
+        prob = stdtr(df, -fabs(t)) * 2
+        stderr = sqrt((1 - r ** 2) * vals.s_yy / s_xx / df)
     
     return LinregressResult(slope, intercept, r, prob, stderr)
 
