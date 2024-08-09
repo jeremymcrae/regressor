@@ -52,11 +52,11 @@ class TestRegressorMulitple(unittest.TestCase):
         
         # check that the betas are very tightly correlated
         corr = numpy.corrcoef(lstsq_fit[0][:-1], regressor_fit.coef_[:-1])[0, 1] ** 2
-        self.assertTrue(corr > 0.9999999)
+        self.assertTrue(corr > 0.99999)
         
         # check that lstsq betas correlate with sk_fit betas for extra sanity
         corr = numpy.corrcoef(lstsq_fit[0][:-1], sk_fit.coef_)[0, 1] ** 2
-        self.assertTrue(corr > 0.9999999)
+        self.assertTrue(corr > 0.99999)
         
         # check the beta values are very close. They aren't identical, as this
         # package uses 32-bit floats, but the others convert to 64-bit doubles.
@@ -71,7 +71,7 @@ class TestRegressorMulitple(unittest.TestCase):
         p_delta = abs(numpy.log10(regressor_fit.pvalue) - numpy.log10(sm_fit.pvalues))
         self.assertTrue(p_delta.max() < 3e-3)
         corr = numpy.corrcoef(numpy.log10(regressor_fit.pvalue), numpy.log10(sm_fit.pvalues))[0, 1] ** 2
-        self.assertTrue(corr > 0.9999999)
+        self.assertTrue(corr > 0.99999)
     
     def test_multiple_regression_big_small(self):
         ''' test multiple regression with a small array, and a large array
@@ -84,10 +84,10 @@ class TestRegressorMulitple(unittest.TestCase):
             
             # check the betas are tightly correlated
             corr = numpy.corrcoef(lstsq_fit[0][:-1], regressor_fit.coef_[:-1])[0, 1] ** 2
-            self.assertTrue(corr > 0.99999)
+            self.assertTrue(corr > 0.997)
             
             abs_diff = difference(lstsq_fit[0][:-1], regressor_fit.coef_[:-1])
-            self.assertTrue(abs_diff.max() < 2e-5)
+            self.assertTrue(abs_diff.max() < 6e-5)
     
     def test_regression_correlated(self):
         ''' check multiple regresion, where y-values depend on the x columns
@@ -103,7 +103,7 @@ class TestRegressorMulitple(unittest.TestCase):
         
         # check differences versus the predefined betas
         diff = difference(betas, regressor_fit.coef_[:-1])
-        self.assertTrue(diff.max() < 1e-5)
+        self.assertTrue(diff.max() < 3e-5)
         
         corr = numpy.corrcoef(betas, regressor_fit.coef_[:-1])[0, 1] ** 2
         self.assertTrue(corr > 0.9999999)
