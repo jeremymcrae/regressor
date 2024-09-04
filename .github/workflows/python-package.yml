@@ -1,4 +1,4 @@
-uptname: regressor
+name: regressor
 
 on: 
   push:
