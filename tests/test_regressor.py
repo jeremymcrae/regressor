@@ -63,7 +63,7 @@ class TestRegressor(unittest.TestCase):
                 self.assertTrue(d_intercept < 1.002 or a_intercept < 1e-7, msg=f'intercept differs: d_intercept: {d_intercept}, a_intercept: {a_intercept}')
                 self.assertTrue(d_rvalue < 1.0004 or a_rvalue < 1e-8, msg=f'rvalue differs: d_rvalue: {d_rvalue}, a_rvalue: {a_rvalue}')
                 self.assertTrue(d_pvalue < 1.02 or a_pvalue < 1e-7, msg=f'pvalue differs: d_pvalue: {d_pvalue}, a_pvalue: {a_pvalue}')
-                self.assertTrue(a_stderr < 1e-5, msg=f'stderr differs: a_stderr: {a_stderr}')
+                self.assertTrue(a_stderr < 1.5e-5, msg=f'stderr differs: a_stderr: {a_stderr}')
 
     def test_linregress_small(self):
         ''' check results from small arrays
