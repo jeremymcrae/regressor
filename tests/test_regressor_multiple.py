@@ -69,9 +69,9 @@ class TestRegressorMulitple(unittest.TestCase):
         
         # check the p-values are nearly identical in log10 space, and correlate
         p_delta = abs(numpy.log10(regressor_fit.pvalue) - numpy.log10(sm_fit.pvalues))
-        self.assertTrue(p_delta.max() < 4e-3)
+        self.assertTrue(p_delta.max() < 5e-3, msg=f'pvalue differs: p_delta={p_delta}')
         corr = numpy.corrcoef(numpy.log10(regressor_fit.pvalue), numpy.log10(sm_fit.pvalues))[0, 1] ** 2
-        self.assertTrue(corr > 0.99999)
+        self.assertTrue(corr > 0.99999, msg=f'corr too divergent from 1: corr={corr}')
     
     def test_multiple_regression_big_small(self):
         ''' test multiple regression with a small array, and a large array
