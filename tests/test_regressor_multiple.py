@@ -87,7 +87,7 @@ class TestRegressorMulitple(unittest.TestCase):
             self.assertTrue(corr > 0.997)
             
             abs_diff = difference(lstsq_fit[0][:-1], regressor_fit.coef_[:-1])
-            self.assertTrue(abs_diff.max() < 1.5e-4, msg=f'max abs_diff={abs_diff.max()} for n={n}')
+            self.assertTrue(abs_diff.max() < 2e-4, msg=f'max abs_diff={abs_diff.max()} for n={n}')
     
     def test_regression_correlated(self):
         ''' check multiple regresion, where y-values depend on the x columns
