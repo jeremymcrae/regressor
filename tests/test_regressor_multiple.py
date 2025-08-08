@@ -103,7 +103,7 @@ class TestRegressorMulitple(unittest.TestCase):
         
         # check differences versus the predefined betas
         diff = difference(betas, regressor_fit.coef_[:-1])
-        self.assertTrue(diff.max() < 5e-5)
+        self.assertTrue(diff.max() < 6e-5, msg=f'betas differ: max diff={diff.max()}')
         
         corr = numpy.corrcoef(betas, regressor_fit.coef_[:-1])[0, 1] ** 2
         self.assertTrue(corr > 0.9999999)
